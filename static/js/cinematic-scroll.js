@@ -6,7 +6,12 @@
 
 function checkAndInitScroll() {
   if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
-    setTimeout(checkAndInitScroll, 200);
+    setTimeout(checkAndInitScroll, 100);
+    return;
+  }
+  const stage = document.getElementById('studio-stage');
+  if (!stage) {
+    setTimeout(checkAndInitScroll, 100);
     return;
   }
   initCinematicScroll();
@@ -17,17 +22,16 @@ if (document.readyState === 'loading') {
 } else {
   checkAndInitScroll();
 }
+window.addEventListener('load', () => {
+  checkAndInitScroll();
+  if (typeof ScrollTrigger !== 'undefined') {
+    setTimeout(() => { ScrollTrigger.refresh(); }, 300);
+  }
+});
 
 function initCinematicScroll() {
   if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
   gsap.registerPlugin(ScrollTrigger);
-
-  // Check accessibility motion preference
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (prefersReducedMotion) {
-    console.log('Reduced motion enabled: subtle camera mode');
-    return;
-  }
 
   const stage = document.getElementById('studio-stage');
   if (!stage) return;

@@ -6,9 +6,12 @@
     { "source": "/about", "destination": "/about-me-detail.html" },
     { "source": "/education", "destination": "/education-detail.html" },
     { "source": "/skills", "destination": "/skills-detail.html" },
-    { "source": "/projects", "destination": "/project-detail.html" },
-    { "source": "/work", "destination": "/project-detail.html" },
-    { "source": "/youtube", "destination": "/youtube-detail.html" },
+    { "source": "/toolkit", "destination": "/toolkit.html" },
+    { "source": "/services", "destination": "/services.html" },
+    { "source": "/showreel", "destination": "/showreel.html" },
+    { "source": "/work", "destination": "/work.html" },
+    { "source": "/projects", "destination": "/work.html" },
+    { "source": "/youtube", "destination": "/youtube.html" },
     { "source": "/contact", "destination": "/contact.html" },
     { "source": "/resume", "destination": "/resume-preview.html" }
   ]

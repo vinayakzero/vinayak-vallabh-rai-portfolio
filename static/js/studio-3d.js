@@ -27,7 +27,12 @@
 
   function checkAndInit() {
     if (typeof THREE === 'undefined') {
-      setTimeout(checkAndInit, 200);
+      setTimeout(checkAndInit, 100);
+      return;
+    }
+    const container = document.getElementById('studio-canvas-container');
+    if (!container) {
+      setTimeout(checkAndInit, 100);
       return;
     }
     initStudio3D();
@@ -38,6 +43,8 @@
   } else {
     checkAndInit();
   }
+  // Extra safety trigger on full window load
+  window.addEventListener('load', checkAndInit);
 
   function initStudio3D() {
     const container = document.getElementById('studio-canvas-container');
@@ -54,30 +61,41 @@
     // 2. CAMERA SETUP
     camera = new THREE.PerspectiveCamera(
       45,
-      window.innerWidth / window.innerHeight,
+      (window.innerWidth || 1200) / (window.innerHeight || 800),
       0.1,
       100
     );
-    camera.position.set(0, 3.5, 14);
+    camera.position.set(0, isMobile ? 4.0 : 3.5, isMobile ? 17.5 : 14);
 
-    // 3. RENDERER SETUP (Safe fallback)
-    try {
-      renderer = new THREE.WebGLRenderer({
-        antialias: !isMobile,
-        powerPreference: 'default',
-        alpha: false,
-        failIfMajorPerformanceCaveat: false
-      });
-    } catch (e) {
-      console.warn('WebGL initialization failed:', e);
+    // 3. RENDERER SETUP (Multi-tier safe initialization)
+    const renderOpts = [
+      { antialias: !isMobile, powerPreference: 'default', alpha: false },
+      { antialias: false, powerPreference: 'low-power', alpha: false },
+      { antialias: false, precision: 'mediump' }
+    ];
+
+    for (let i = 0; i < renderOpts.length; i++) {
+      try {
+        renderer = new THREE.WebGLRenderer(renderOpts[i]);
+        if (renderer && renderer.domElement) break;
+      } catch (err) {
+        console.warn('WebGL init attempt ' + (i + 1) + ' failed:', err);
+      }
+    }
+
+    if (!renderer || !renderer.domElement) {
+      console.warn('WebGL not supported on this device/browser');
       return;
     }
+
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    try {
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.15;
+    } catch (e) {}
     container.appendChild(renderer.domElement);
 
     studioGroup = new THREE.Group();
@@ -855,24 +873,51 @@
 
   function animate() {
     requestAnimationFrame(animate);
+    if (!renderer || !scene || !camera) return;
+
     const elapsedTime = clock.getElapsedTime();
 
-    updateMonitorNLECanvas(elapsedTime);
+    try {
+      updateMonitorNLECanvas(elapsedTime);
+    } catch (e) {}
 
     mouseX += (targetParallaxX - mouseX) * 0.05;
     mouseY += (targetParallaxY - mouseY) * 0.05;
 
-    const st = window.studioCameraState;
-    camera.position.x = st.posX + mouseX;
-    camera.position.y = st.posY + mouseY;
-    camera.position.z = st.posZ;
+    const st = window.studioCameraState || {
+      posX: 0,
+      posY: isMobile ? 4.0 : 3.5,
+      posZ: isMobile ? 17.5 : 14,
+      lookX: 0,
+      lookY: 1.8,
+      lookZ: 0,
+      playheadProgress: 0.05
+    };
 
-    camera.lookAt(st.lookX + mouseX * 0.3, st.lookY + mouseY * 0.3, st.lookZ);
+    // Continuous organic studio floating & breathing motion
+    const idleFloatX = Math.sin(elapsedTime * 0.5) * 0.28;
+    const idleFloatY = Math.cos(elapsedTime * 0.38) * 0.16;
+    const idleFloatZ = Math.sin(elapsedTime * 0.28) * 0.18;
+
+    const posX = (typeof st.posX === 'number' && !isNaN(st.posX)) ? st.posX : 0;
+    const posY = (typeof st.posY === 'number' && !isNaN(st.posY)) ? st.posY : (isMobile ? 4.0 : 3.5);
+    const posZ = (typeof st.posZ === 'number' && !isNaN(st.posZ)) ? st.posZ : (isMobile ? 17.5 : 14);
+
+    const lookX = (typeof st.lookX === 'number' && !isNaN(st.lookX)) ? st.lookX : 0;
+    const lookY = (typeof st.lookY === 'number' && !isNaN(st.lookY)) ? st.lookY : 1.8;
+    const lookZ = (typeof st.lookZ === 'number' && !isNaN(st.lookZ)) ? st.lookZ : 0;
+
+    camera.position.x = posX + mouseX + idleFloatX;
+    camera.position.y = posY + mouseY + idleFloatY;
+    camera.position.z = posZ + idleFloatZ;
+
+    camera.lookAt(lookX + mouseX * 0.3 + idleFloatX * 0.15, lookY + mouseY * 0.3, lookZ);
 
     if (timelinePlayhead) {
+      const prog = (typeof st.playheadProgress === 'number' && !isNaN(st.playheadProgress)) ? st.playheadProgress : 0.05;
       const totalWidth = 6 * (1.4 + 0.22);
       const startX = -(totalWidth / 2) + 0.7;
-      timelinePlayhead.position.x = startX + st.playheadProgress * (totalWidth - 1.4);
+      timelinePlayhead.position.x = startX + prog * (totalWidth - 1.4);
     }
 
     floatingFrames.forEach((frame) => {

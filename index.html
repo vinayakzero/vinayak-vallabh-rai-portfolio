@@ -14,13 +14,17 @@
   <!-- Stylesheet -->
   <link rel="stylesheet" href="styles.css">
   
-  <!-- Three.js 3D WebGL Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <!-- GSAP & ScrollTrigger -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Three.js 3D WebGL Library (Self-Hosted + CDN Fallback) -->
+  <script src="static/js/three.min.js"></script>
+  <script>if (typeof THREE === 'undefined') document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');</script>
+  <!-- GSAP & ScrollTrigger (Self-Hosted + CDN Fallback) -->
+  <script src="static/js/gsap.min.js"></script>
+  <script>if (typeof gsap === 'undefined') document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"><\/script>');</script>
+  <script src="static/js/ScrollTrigger.min.js"></script>
+  <script>if (typeof ScrollTrigger === 'undefined') document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"><\/script>');</script>
+  <!-- Lucide Icons (Self-Hosted + CDN Fallback) -->
+  <script src="static/js/lucide.min.js"></script>
+  <script>if (typeof lucide === 'undefined') document.write('<script src="https://unpkg.com/lucide@latest"><\/script>');</script>
 </head>
 <body>
 
