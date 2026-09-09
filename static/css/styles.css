@@ -352,6 +352,7 @@ a {
   transition: opacity 0.5s ease, filter 0.5s ease;
 }
 
+.story-phase#phase-01,
 .story-phase.phase-active {
   opacity: 1;
   filter: blur(0);

@@ -155,31 +155,36 @@ function initCinematicScroll() {
   }, 'phase5');
 
   /* -------------------------------------------------------------------------
-     HTML HUD PHASE TEXT ANIMATIONS
+     HTML HUD PHASE TEXT ANIMATIONS (Explicit & Safe Transitions)
   ------------------------------------------------------------------------- */
-  phases.forEach((phase, i) => {
-    const label = i === 0 ? 'phase1' : `phase${i + 1}`;
-    
-    // Fade in
-    tl.to(phase, {
-      opacity: 1,
-      y: 0,
-      filter: 'blur(0px)',
-      duration: 0.8,
-      ease: 'power2.out'
-    }, label);
-
-    // Fade out prior phases except the last
-    if (i > 0) {
-      tl.to(phases[i - 1], {
-        opacity: 0,
-        y: -30,
-        filter: 'blur(8px)',
-        duration: 0.6,
-        ease: 'power2.in'
-      }, label);
+  if (phases[0]) {
+    gsap.set(phases[0], { opacity: 1, y: 0, filter: 'blur(0px)', autoAlpha: 1 });
+  }
+  for (let p = 1; p < phases.length; p++) {
+    if (phases[p]) {
+      gsap.set(phases[p], { opacity: 0, y: 30, filter: 'blur(8px)', autoAlpha: 0 });
     }
-  });
+  }
+
+  if (phases[0] && phases[1]) {
+    tl.to(phases[0], { opacity: 0, y: -30, filter: 'blur(8px)', autoAlpha: 0, duration: 1.0 }, 'phase2')
+      .to(phases[1], { opacity: 1, y: 0, filter: 'blur(0px)', autoAlpha: 1, duration: 1.0 }, 'phase2');
+  }
+
+  if (phases[1] && phases[2]) {
+    tl.to(phases[1], { opacity: 0, y: -30, filter: 'blur(8px)', autoAlpha: 0, duration: 1.0 }, 'phase3')
+      .to(phases[2], { opacity: 1, y: 0, filter: 'blur(0px)', autoAlpha: 1, duration: 1.0 }, 'phase3');
+  }
+
+  if (phases[2] && phases[3]) {
+    tl.to(phases[2], { opacity: 0, y: -30, filter: 'blur(8px)', autoAlpha: 0, duration: 1.0 }, 'phase4')
+      .to(phases[3], { opacity: 1, y: 0, filter: 'blur(0px)', autoAlpha: 1, duration: 1.0 }, 'phase4');
+  }
+
+  if (phases[3] && phases[4]) {
+    tl.to(phases[3], { opacity: 0, y: -30, filter: 'blur(8px)', autoAlpha: 0, duration: 1.0 }, 'phase5')
+      .to(phases[4], { opacity: 1, y: 0, filter: 'blur(0px)', autoAlpha: 1, duration: 1.0 }, 'phase5');
+  }
 
   /* -------------------------------------------------------------------------
      SCROLLTRIGGER FOR REGULAR CONTENT SECTIONS
